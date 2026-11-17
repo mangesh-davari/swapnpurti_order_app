@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="mr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Hotel Swapnapurti - POS</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=Noto+Sans+Devanagari:wght@500;700&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box} body{margin:0;font-family:'Inter','Noto Sans Devanagari',sans-serif;background:#F6F3EF;color:#1A1A1A}
+.top{background:#1A0F0F;color:#fff;padding:14px 18px;display:flex;justify-content:space-between;align-items:center;position:sticky;top:0;z-index:20}
+.top h1{margin:0;font-size:21px} .top h1 span{color:#FFB300} .top p{margin:2px 0 0;font-size:12px;opacity:.7}
+.badge{background:#FFB300;color:#000;font-weight:800;padding:7px 12px;border-radius:20px;font-size:12px}
+.toolbar{max-width:1250px;margin:auto;padding:12px 14px 0;display:flex;gap:10px}
+.search{flex:1;padding:12px 14px;border-radius:12px;border:1.5px solid #E8E0D8;font-size:15px;outline:none;background:#fff}
+.modeBtn{padding:12px 16px;border-radius:12px;background:#1A0F0F;color:#fff;font-weight:700;border:none;cursor:pointer;white-space:nowrap}
+.modeBtn.kitchen{background:#FF6D00}
+.wrap{max-width:1250px;margin:auto;padding:14px;display:grid;grid-template-columns:1fr 380px;gap:16px}
+.wrap.kitchen-only{grid-template-columns:1fr}
+@media(max-width:900px){.wrap{grid-template-columns:1fr}}
+.card{background:#fff;border-radius:18px;padding:16px;box-shadow:0 4px 20px rgba(0,0,0,.06)}
+.field{width:100%;padding:12px;border:1.5px solid #E8E0D8;border-radius:12px;font-size:15px;margin-bottom:10px;outline:none;background:#FFFCF8}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.tabs{display:flex;gap:8px;overflow-x:auto;padding:6px 0 12px}
+.tab{white-space:nowrap;padding:10px 16px;border-radius:25px;border:1px solid #E8E0D8;background:#fff;font-weight:600;cursor:pointer}
+.tab.active{background:#1A0F0F;color:#fff}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:12px} @media(max-width:500px){.grid{grid-template-columns:1fr}}
+.food{border:1.5px solid #F0E9E0;border-radius:16px;padding:14px;display:flex;flex-direction:column;gap:8px;background:#fff}
+.food b{font-size:15px} .food small{color:#888}
+.price-row{display:flex;justify-content:space-between;align-items:center}
+.price{font-weight:800;font-size:18px} .addBtn{background:#1A0F0F;color:#fff;border:none;padding:10px 18px;border-radius:11px;font-weight:700;cursor:pointer}
+.dot{width:14px;height:14px;border:2px solid #2E7D32;display:inline-flex;align-items:center;justify-content:center;border-radius:3px}.dot i{width:7px;height:7px;background:#2E7D32;border-radius:50%}
+.dot.non{border-color:#B71C1C}.dot.non i{background:#B71C1C;clip-path:polygon(50% 0,100% 100%,0 100%);border-radius:0}
+.bill{position:sticky;top:76px}
+.total-row{display:flex;justify-content:space-between;font-weight:800;font-size:20px;padding:12px 0}
+.payBtn{width:100%;background:#FFB300;border:none;padding:14px;border-radius:14px;font-weight:800;font-size:16px;cursor:pointer}
+.bill-item{display:flex;justify-content:space-between;padding:9px 0;border-bottom:1px dashed #E8E0D8;font-size:14px}
+.qtyBtn{display:inline-flex;gap:8px;align-items:center;background:#F6F3EF;padding:3px;border-radius:20px}
+.qtyBtn button{width:26px;height:26px;border-radius:50%;border:none;background:#fff;font-weight:800;cursor:pointer}
+.statusTabs{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0}
+.sTab{padding:8px 13px;border-radius:20px;border:1px solid #E8E0D8;background:#fff;font-weight:600;font-size:13px;cursor:pointer}
+.sTab.active{background:#FFB300;border-color:#FFB300}
+.orderCard{border:1.5px solid #EFE9E0;border-radius:16px;padding:14px;margin-bottom:12px;background:#FFFCF8}
+.orderCard.queued{border-left:6px solid #FFB300}
+.orderCard.served{border-left:6px solid #2E7D32;background:#F1F8E9}
+.orderCard.done{border-left:6px solid #9E9E9E;opacity:.75}
+.pill{font-size:11px;padding:4px 9px;border-radius:20px;font-weight:800}
+.pill.queued{background:#FFF3D6;color:#7A4A00} .pill.served{background:#C8E6C9;color:#1B5E20} .pill.done{background:#E0E0E0;color:#424242}
+.btn{border:none;padding:10px 12px;border-radius:10px;font-weight:700;cursor:pointer;font-size:13px}
+.btn-serve{background:#2E7D32;color:#fff} .btn-done{background:#1A0F0F;color:#fff} .btn-del{background:#fff;border:1px solid #ccc}
+.flex{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+.stats{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:10px}
+.stat{background:#F6F3EF;border-radius:12px;padding:10px;text-align:center} .stat b{font-size:18px;display:block} .stat span{font-size:11px;color:#666}
+.hidden{display:none!important}
+/* BILL POPUP - Works in both modes, stays in same mode */
+.billModal{position:fixed;inset:0;background:rgba(0,0,0,.65);display:flex;align-items:center;justify-content:center;z-index:999;padding:16px}
+.billBox{background:#fff;border-radius:18px;padding:18px;max-width:360px;width:100%;max-height:90vh;overflow:auto;box-shadow:0 10px 40px rgba(0,0,0,.3)}
+.billText{font-family:monospace;font-size:13px;line-height:1.6;white-space:pre-line;background:#FFFCF8;border:1.5px dashed #E8E0D8;border-radius:12px;padding:12px;margin:10px 0}
+.waBtn{width:100%;background:#25D366;color:#fff;border:none;padding:13px;border-radius:12px;font-weight:800;font-size:15px;cursor:pointer;margin-bottom:8px}
+.closeBtn{width:100%;background:#F6F3EF;border:1px solid #ddd;padding:12px;border-radius:12px;font-weight:700;cursor:pointer}
+</style>
+</head>
+<body>
+<div class="top"><div><h1>HOTEL <span>SWAPNAPURTI</span></h1><p>सिंगण - निरा रोड, कुंभारवाडी फाटा जवळ • 9404116576 / 9403234724</p></div><div class="badge" id="modeBadge">RECEPTION POS</div></div>
+
+<div class="toolbar">
+  <input class="search hidden" id="kitchenSearch" placeholder="🔍 Kitchen Search - Name / Mobile / Bill No. उदा. राम, 94041, 5" oninput="renderQueue()">
+  <button class="modeBtn" id="modeBtn" onclick="toggleMode()">👨‍🍳 Kitchen Mode</button>
+</div>
+
+<div class="wrap" id="mainWrap">
+<div id="leftCol">
+  <div class="card" id="customerCard">
+    <h3 style="margin:0 0 12px">👤 Customer Details</h3>
+    <input class="field" id="cname" placeholder="Customer Name • ग्राहकाचे नाव *">
+    <div class="row"><input class="field" id="cmobile" placeholder="Mobile • मोबाईल * (10 digit only)" type="tel" maxlength="10" inputmode="numeric" oninput="this.value=this.value.replace(/[^0-9]/g,'').slice(0,10)"><select class="field" id="otype"><option>Dine-In • जेवण</option><option>Takeaway • पार्सल</option></select></div>
+    <input class="field" id="note" placeholder="Note • उदा. कमी तिखट, जास्त रस्सा">
+  </div>
+  <div class="tabs" id="tabs"></div>
+  <div class="grid" id="menuGrid"></div>
+
+  <div class="card" style="margin-top:16px" id="queueCard">
+    <h3 style="margin:0">🔥 Live Orders</h3>
+    <div class="stats">
+      <div class="stat"><b id="cQueued">0</b><span>🟡 Queued - रांगेत</span></div>
+      <div class="stat"><b id="cServed">0</b><span>🟢 Served - वाढले</span></div>
+      <div class="stat"><b id="cDone">0</b><span>✅ Done - पेमेंट झाले</span></div>
+    </div>
+    <div class="statusTabs" id="statusTabs"></div>
+    <div id="queueList"></div>
+  </div>
+</div>
+
+<div id="rightCol">
+  <div class="card bill">
+    <h3 style="margin:0">🧾 Live Bill - <span id="orderNo">Bill No. 1</span></h3>
+    <div id="cartList" style="margin-top:10px"></div>
+    <div class="total-row"><span>Total</span><span>₹<span id="total">0</span></span></div>
+    <select class="field" id="paymode"><option>💵 Cash - रोख</option><option>📱 UPI - यूपीआय</option><option>💳 Card - कार्ड</option></select>
+    <button class="payBtn" onclick="placeOrder()">✓ Place Order → Goes to Queue</button>
+    <div id="msg" style="text-align:center;color:#2E7D32;font-weight:700;margin-top:8px"></div>
+  </div>
+  <div class="card" style="margin-top:16px"><h3 style="margin:0">💰 Today's Total (Done) - <span id="dayTotal">₹0</span></h3><small>Completed orders only • Cancelled orders show [CANCELLED]</small><br><button class="btn btn-del" style="margin-top:10px" onclick="resetBillNo()">🔄 Reset Bill No. to 1 (New Day)</button></div>
+</div>
+</div>
+
+<!-- BILL POPUP - Same Mode, Small Popup -->
+<div id="billModal" class="billModal hidden" onclick="if(event.target.id=='billModal') closeBill()">
+  <div class="billBox">
+    <h3 style="margin:0;text-align:center">🧾 Hotel Swapnapurti</h3>
+    <div id="billContent" class="billText"></div>
+    <button class="waBtn" onclick="shareBillFromPopup()">📱 Share on WhatsApp</button>
+    <button class="closeBtn" onclick="closeBill()">Close Bill</button>
+  </div>
+</div>
+
+<script>
+const menu=[
+{cat:"Thali",name:"स्वप्नपूर्ती स्पेशल मटण थाळी",price:350,veg:false,desc:"मटण प्लेट, चिकन प्लेट, मुंडी, मावा, अंडाकरी"},
+{cat:"Thali",name:"स्पेशल मटण थाळी",price:300,veg:false,desc:"मटण, चिकन, अंडाकरी, मुंडी / मावा"},
+{cat:"Thali",name:"मटण थाळी",price:250,veg:false,desc:"मटण, चिकन / मुंडी, अंडाकरी"},
+{cat:"Thali",name:"मुंडी थाळी",price:200,veg:false,desc:"मुंडी, अंडाकरी, तांबडा-पांढरा रस्सा"},
+{cat:"Thali",name:"स्पेशल गावरान थाळी",price:200,veg:false,desc:"200 gm गावरान मटण, तांबडा-पांढरा रस्सा"},
+{cat:"Thali",name:"स्वप्नपूर्ती स्पेशल चिकन थाळी",price:200,veg:false,desc:"चिकन, मुंडी, मावा, अंडाकरी"},
+{cat:"Thali",name:"स्पेशल चिकन थाळी",price:170,veg:false,desc:"चिकन, अंडाकरी, तांबडा-पांढरा रस्सा"},
+{cat:"Thali",name:"चिकन थाळी",price:150,veg:false,desc:"चिकन, अंडाकरी, तांबडा-पांढरा रस्सा"},
+{cat:"Thali",name:"अंडाकरी थाळी",price:120,veg:false,desc:"अंडाकरी, तांबडा-पांढरा रस्सा"},
+{cat:"Thali",name:"स्वप्नपूर्ती स्पेशल शाकाहारी थाळी",price:200,veg:true,desc:"काजू, पनीर, भाजी, आमटी, लोणचे, पापड"},
+{cat:"Thali",name:"पनीर थाळी",price:180,veg:true,desc:"पनीर, भाजी, आमटी, लोणचे, पापड"},
+{cat:"Thali",name:"काजू कुर्मा थाळी",price:170,veg:true,desc:"काजू कुर्मा, भाजी, आमटी, पापड"},
+{cat:"Thali",name:"मसूर थाळी",price:140,veg:true,desc:"मसूर, भाजी, आमटी, पापड"},
+{cat:"Plate",name:"काजू कुर्मा प्लेट - फुल",price:200,veg:true,desc:"Full Plate"},{cat:"Plate",name:"काजू कुर्मा प्लेट - हाफ",price:100,veg:true,desc:"Half Plate"},
+{cat:"Plate",name:"पनीर प्लेट - फुल",price:200,veg:true,desc:"Full Plate"},{cat:"Plate",name:"पनीर प्लेट - हाफ",price:100,veg:true,desc:"Half Plate"},
+{cat:"Plate",name:"मसूर प्लेट - फुल",price:60,veg:true,desc:"Full"},{cat:"Plate",name:"मसूर प्लेट - हाफ",price:30,veg:true,desc:"Half"},
+{cat:"Plate",name:"पापड",price:10,veg:true,desc:"Crispy Papad"},{cat:"Plate",name:"सोलकढी 1 ग्लास",price:10,veg:true,desc:"Solkadhi"},
+{cat:"Plate",name:"मटण प्लेट",price:120,veg:false,desc:"Mutton Plate"},{cat:"Plate",name:"मुंडी प्लेट",price:100,veg:false,desc:"Mundi Plate"},
+{cat:"Plate",name:"चिकन प्लेट",price:80,veg:false,desc:"Chicken Plate"},{cat:"Plate",name:"मासा पीस",price:50,veg:false,desc:"Masa Piece"},
+{cat:"Plate",name:"तांबडा रस्सा",price:30,veg:false,desc:"Tambda Rassa"},{cat:"Plate",name:"पांढरा रस्सा",price:30,veg:false,desc:"Pandhra Rassa"},
+{cat:"Extra",name:"जीरा राईस - फुल",price:100,veg:true,desc:"Full"},{cat:"Extra",name:"जीरा राईस - हाफ",price:50,veg:true,desc:"Half"},
+{cat:"Extra",name:"रोटी",price:15,veg:true,desc:"Roti"},{cat:"Extra",name:"बटर रोटी",price:20,veg:true,desc:"Butter Roti"},
+{cat:"Extra",name:"पाणी बॉटल",price:20,veg:true,desc:"Water Bottle"},{cat:"Extra",name:"एक्स्ट्रा टिकामी थाळी",price:100,veg:true,desc:"Extra Tikami Thali"}
+];
+let activeCat="Thali", activeStatus="All", isKitchen=false, currentBillId=null;
+let cart=JSON.parse(localStorage.getItem('sp_cart')||'{}');
+let orders=JSON.parse(localStorage.getItem('sp_orders_v2')||'[]');
+orders = orders.map(o => o.status==='Cooking' ? {...o, status:'Queued'} : o);
+if(localStorage.getItem('sp_bill_no')===null){
+  let maxOld=0;
+  orders.forEach(o=>{ let n=parseInt(o.billNo||0); if(!isNaN(n) && n>maxOld) maxOld=n; });
+  localStorage.setItem('sp_bill_no', maxOld.toString());
+}
+function peekNextBillNo(){ return parseInt(localStorage.getItem('sp_bill_no')||'0')+1; }
+function getNextBillNo(){ let next=peekNextBillNo(); localStorage.setItem('sp_bill_no', next.toString()); return next; }
+function resetBillNo(){ if(confirm('Reset Bill No. to 1? Old orders will keep their old numbers.')){ localStorage.setItem('sp_bill_no','0'); renderCart(); alert('Done! Next Bill will be Bill No. 1'); } }
+let cats=["Thali","Plate","Extra"], statuses=["All","Queued","Served","Done"];
+function save(){localStorage.setItem('sp_orders_v2',JSON.stringify(orders));}
+function saveCart(){localStorage.setItem('sp_cart',JSON.stringify(cart));}
+function toggleMode(){
+  isKitchen=!isKitchen;
+  document.getElementById('modeBtn').innerText = isKitchen ? '🧾 Reception Mode' : '👨‍🍳 Kitchen Mode';
+  document.getElementById('modeBtn').classList.toggle('kitchen', isKitchen);
+  document.getElementById('modeBadge').innerText = isKitchen ? 'KITCHEN VIEW' : 'RECEPTION POS';
+  document.getElementById('customerCard').classList.toggle('hidden', isKitchen);
+  document.getElementById('rightCol').classList.toggle('hidden', isKitchen);
+  document.getElementById('tabs').classList.toggle('hidden', isKitchen);
+  document.getElementById('menuGrid').classList.toggle('hidden', isKitchen);
+  document.getElementById('mainWrap').classList.toggle('kitchen-only', isKitchen);
+  document.getElementById('kitchenSearch').classList.toggle('hidden', !isKitchen);
+}
+document.getElementById('tabs').innerHTML=cats.map(c=>`<button class="tab ${c==activeCat?'active':''}" onclick="setCat('${c}')">${c=='Thali'?'🍛 Thali':c=='Plate'?'🍽️ Plate':'➕ Extra'}</button>`).join('');
+function setCat(c){activeCat=c;document.querySelectorAll('.tab').forEach((t,i)=>t.classList.toggle('active',cats[i]==c));renderMenu();}
+function renderMenu(){
+  let list=menu.map((m,i)=>{
+    if(m.cat!==activeCat) return '';
+    return `<div class="food"><span class="dot ${m.veg?'':'non'}"><i></i></span><div><b>${m.name}</b><br><small>${m.desc}</small></div><div class="price-row"><span class="price">₹${m.price}</span><button class="addBtn" onclick="add(${i})">+ ADD</button></div></div>`;
+  }).join('');
+  document.getElementById('menuGrid').innerHTML=list;
+}
+function add(i){cart[i]=(cart[i]||0)+1;saveCart();renderCart();}
+function change(i,d){cart[i]=(cart[i]||0)+d;if(cart[i]<=0)delete cart[i];saveCart();renderCart();}
+function renderCart(){
+  let t=0,h='';
+  for(let k in cart){let m=menu[k]; if(!m) continue; t+=m.price*cart[k]; h+=`<div class="bill-item"><div><b>${m.name}</b><br><span class="qtyBtn"><button onclick="change(${k},-1)">−</button><b>${cart[k]}</b><button onclick="change(${k},1)">+</button></span></div><b>₹${m.price*cart[k]}</b></div>`;}
+  document.getElementById('cartList').innerHTML=h||'<div style="text-align:center;color:#999;padding:12px">No items yet<br>Tap + ADD to add items</div>';
+  document.getElementById('total').innerText=t;
+  document.getElementById('orderNo').innerText='Bill No. '+peekNextBillNo();
+}
+function placeOrder(){
+  let n=document.getElementById('cname').value.trim();
+  let mo=document.getElementById('cmobile').value.replace(/[^0-9]/g,'').slice(0,10);
+  document.getElementById('cmobile').value=mo;
+  if(!n || mo.length!==10){alert('Please enter Name & 10-digit Mobile (10 अंकच)');return;}
+  if(Object.keys(cart).length==0){alert('Add at least 1 item');return;}
+  let billNo=getNextBillNo();
+  let items=Object.keys(cart).map(k=>menu[k].name+' x '+cart[k]).join(', ');
+  let o={id:Date.now(), orderNo:'Bill No. '+billNo, billNo:billNo, name:n, mobile:mo, type:document.getElementById('otype').value, note:document.getElementById('note').value, pay:document.getElementById('paymode').value, items, total:document.getElementById('total').innerText, time:new Date().toLocaleString('en-IN'), status:'Queued'};
+  orders.unshift(o); save();
+  document.getElementById('msg').innerText='✓ Bill No. '+billNo+' Queued!';
+  cart={}; saveCart(); renderCart(); renderQueue();
+  document.getElementById('cname').value=''; document.getElementById('cmobile').value=''; document.getElementById('note').value='';
+  showBill(o.id);
+}
+// --- FIXED: Bill Popup stays in same mode ---
+function showBill(id){
+  let o=typeof id==='object' ? id : orders.find(x=>x.id==id);
+  if(!o) return;
+  currentBillId=o.id;
+  let billText=`HOTEL SWAPNAPURTI\nSinghan - Nira Road\n----------------\nBill No: ${o.billNo}\nCustomer: ${o.name}\nMobile: ${o.mobile}\nType: ${o.type}\nTime: ${o.time}\n----------------\n${o.items.split(', ').join('\n')}\n----------------\nTotal: Rs.${o.total}\nPayment: ${o.pay}\nNote: ${o.note||'-'}\n----------------\nधन्यवाद! पुन्हा भेट द्या 🙏`;
+  document.getElementById('billContent').innerText=billText;
+  document.getElementById('billModal').classList.remove('hidden');
+}
+function closeBill(){ document.getElementById('billModal').classList.add('hidden'); currentBillId=null; }
+function shareBillFromPopup(){
+  let o=orders.find(x=>x.id==currentBillId); if(!o){alert('Bill not found');return;}
+  // Use SAME mobile number from this order
+  let cleanMo=(o.mobile||'').replace(/[^0-9]/g,'').slice(-10);
+  let txt=`*HOTEL SWAPNAPURTI*\nSinghan - Nira Road\n----------------\nBill No: ${o.billNo}\nCustomer: ${o.name}\nType: ${o.type}\n----------------\n${o.items.split(', ').join('\n')}\n----------------\n*Total: Rs.${o.total}*\nPayment: ${o.pay}\nधन्यवाद! 🙏`;
+  window.open('https://wa.me/91'+cleanMo+'?text='+encodeURIComponent(txt),'_blank');
+}
+function setStatus(id,newStatus){let o=orders.find(x=>x.id==id); if(o){o.status=newStatus; save(); renderQueue();}}
+function delOrder(id){
+  let o=orders.find(x=>x.id==id); if(!o) return;
+  if(confirm('Cancel Bill No. '+o.billNo+' - '+o.name+' ?\nIt will move to Done as [CANCELLED]')){
+    o.status='Done'; o.note=(o.note||'')+' [CANCELLED]'; save(); renderQueue();
+  }
+}
+function renderQueue(){
+  document.getElementById('statusTabs').innerHTML=statuses.map(s=>`<button class="sTab ${s==activeStatus?'active':''}" onclick="setStatusFilter('${s}')">${s}</button>`).join('');
+  let q=orders.filter(o=>activeStatus=='All'||o.status==activeStatus);
+  let kq=(document.getElementById('kitchenSearch').value||'').toLowerCase().trim();
+  if(kq){ q=q.filter(o=> (o.name||'').toLowerCase().includes(kq) || (o.mobile||'').includes(kq) || String(o.billNo||'').includes(kq) ); }
+  document.getElementById('cQueued').innerText=orders.filter(o=>o.status=='Queued').length;
+  document.getElementById('cServed').innerText=orders.filter(o=>o.status=='Served').length;
+  document.getElementById('cDone').innerText=orders.filter(o=>o.status=='Done').length;
+  document.getElementById('dayTotal').innerText='₹'+orders.filter(o=>o.status=='Done' && !(o.note||'').includes('CANCELLED')).reduce((s,o)=>s+parseInt(o.total||0),0);
+  document.getElementById('queueList').innerHTML=q.map(o=>{
+    let cls=o.status.toLowerCase();
+    let btns='';
+    if(o.status=='Queued') btns=`<button class="btn btn-serve" onclick="setStatus(${o.id},'Served')">✅ Mark Served - वाढले</button>`;
+    if(o.status=='Served') btns=`<button class="btn btn-done" onclick="setStatus(${o.id},'Done')">💰 Payment Done - Complete</button>`;
+    if(o.status=='Done') btns=`<span style="font-size:13px;color:#2E7D32;font-weight:700">✓ Completed</span>`;
+    return `<div class="orderCard ${cls}"><div style="display:flex;justify-content:space-between;gap:8px"><b>Bill No. ${o.billNo} - ${o.name}</b><span class="pill ${cls}">${o.status}</span></div><small>${o.mobile} • ${o.type} • ${o.pay} • ${o.time}</small><div style="margin-top:8px;font-size:14px">${o.items}</div>${o.note?`<div style="font-size:13px;color:#BF360C;margin-top:4px">Note: ${o.note}</div>`:''}<div style="display:flex;justify-content:space-between;align-items:center;margin-top:8px"><b>₹${o.total}</b></div><div class="flex">${btns}<button class="btn btn-del" onclick="showBill(${o.id})">🧾 View Bill</button><button class="btn btn-del" onclick="delOrder(${o.id})">🚫 Cancel</button><button class="btn btn-del" onclick="callCust('${o.mobile}')">📞 Call</button></div></div>`;
+  }).join('')||'<div style="text-align:center;color:#999;padding:16px">No orders found. Try different Name / Mobile / Bill No.</div>';
+}
+function setStatusFilter(s){activeStatus=s;renderQueue();}
+function callCust(m){window.location.href='tel:'+m;}
+renderMenu();renderCart();renderQueue();
+</script>
+</body>
+</html>
